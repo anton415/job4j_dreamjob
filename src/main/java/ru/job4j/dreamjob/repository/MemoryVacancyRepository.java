@@ -12,11 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class MemoryVacancyRepository implements VacancyRepository {
-    
-    private static final MemoryVacancyRepository INSTANCE = new MemoryVacancyRepository();    
-
     private int nextId = 1;
-
     private final Map<Integer, Vacancy> vacancies = new HashMap<>();
 
     private MemoryVacancyRepository() {
@@ -27,10 +23,6 @@ public class MemoryVacancyRepository implements VacancyRepository {
         save(new Vacancy(0, "Middle Java Developer", "Description for Middle Java Developer", LocalDateTime.of(2022, 6, 23, 0, 0)));
         save(new Vacancy(0, "Middle+ Java Developer", "Description for Middle+ Java Developer", LocalDateTime.of(2021, 5, 11, 0, 0)));
         save(new Vacancy(0, "Senior Java Developer", "Description for Senior Java Developer", LocalDateTime.of(2021, 6, 30, 0, 0)));
-    }
-
-    public static MemoryVacancyRepository getInstance() {
-        return INSTANCE;
     }
 
     @Override
