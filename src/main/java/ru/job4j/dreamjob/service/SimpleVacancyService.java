@@ -7,16 +7,14 @@ import ru.job4j.dreamjob.repository.VacancyRepository;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class SimpleVacancyService implements VacancyService {
+    private final VacancyRepository vacancyRepository;
 
-    private static final SimpleVacancyService INSTANCE = new SimpleVacancyService();
-
-    private final VacancyRepository vacancyRepository = MemoryVacancyRepository.getInstance();
-
-    private SimpleVacancyService() { }
-
-    public static SimpleVacancyService getInstance() {
-        return INSTANCE;
+    private SimpleVacancyService(VacancyRepository vacancyRepository) {
+        this.vacancyRepository = vacancyRepository;
     }
 
     @Override

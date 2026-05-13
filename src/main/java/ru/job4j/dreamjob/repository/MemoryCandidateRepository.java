@@ -12,7 +12,6 @@ import ru.job4j.dreamjob.model.Candidate;
 
 @Repository
 public class MemoryCandidateRepository implements CandidateRepository {
-    private static final MemoryCandidateRepository INSTANCE = new MemoryCandidateRepository();
     private int nextId = 1;
     private final Map<Integer, Candidate> candidates = new HashMap<>();
 
@@ -22,10 +21,6 @@ public class MemoryCandidateRepository implements CandidateRepository {
         save(new Candidate(0, "Sidor", "Python developer", LocalDateTime.of(2026, 2, 13, 0, 0)));
         save(new Candidate(0, "Vladimir", "C# developer", LocalDateTime.of(2023, 1, 21, 0, 0)));
         save(new Candidate(0, "Dmitry", "C++ developer", LocalDateTime.of(2022, 6, 23, 0, 0)));
-    }
-
-    public static MemoryCandidateRepository getInstance() {
-        return INSTANCE;
     }
 
     @Override
