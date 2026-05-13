@@ -2,20 +2,25 @@ package ru.job4j.dreamjob.repository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import net.jcip.annotations.ThreadSafe;
 
 import org.springframework.stereotype.Repository;
 
 import ru.job4j.dreamjob.model.Candidate;
 
+@ThreadSafe
 @Repository
 public class MemoryCandidateRepository implements CandidateRepository {
-    private int nextId = 1;
-    private final Map<Integer, Candidate> candidates = new HashMap<>();
+    private final AtomicInteger nextId = new AtomicInteger(1);
+    private final ConcurrentMap<Integer, Candidate> candidates = new ConcurrentHashMap<>();
 
-    private MemoryCandidateRepository() {
+    public MemoryCandidateRepository() {
         save(new Candidate(0, "Anton", "Go developer", LocalDateTime.of(2024, 6, 11, 0, 0)));
         save(new Candidate(0, "Petr", "Java developer", LocalDateTime.of(2025, 3, 2, 0, 0)));
         save(new Candidate(0, "Sidor", "Python developer", LocalDateTime.of(2026, 2, 13, 0, 0)));
@@ -25,9 +30,10 @@ public class MemoryCandidateRepository implements CandidateRepository {
 
     @Override
     public Candidate save(Candidate candidate) {
-        candidate.setId(nextId++);
-        candidates.put(candidate.getId(), candidate);
-        return candidate;
+        candidate.setId(nextId.getAndIncrement());
+        var savedCandidate = copy(candidate);
+        candidates.put(savedCandidate.getId(), savedCandidate);
+        return copy(savedCandidate);
     }
 
     @Override
@@ -37,17 +43,33 @@ public class MemoryCandidateRepository implements CandidateRepository {
 
     @Override
     public boolean update(Candidate candidate) {
-        return candidates.computeIfPresent(candidate.getId(), 
-                (id, oldCandidate) -> new Candidate(oldCandidate.getId(), candidate.getName(), candidate.getDescription(), oldCandidate.getCreationDate())) != null;
+        var updatedCandidate = copy(candidate);
+        return candidates.computeIfPresent(updatedCandidate.getId(),
+                (id, oldCandidate) -> new Candidate(
+                        oldCandidate.getId(),
+                        updatedCandidate.getName(),
+                        updatedCandidate.getDescription(),
+                        oldCandidate.getCreationDate())) != null;
     }
 
     @Override
     public Optional<Candidate> findById(int id) {
-        return Optional.ofNullable(candidates.get(id));
+        return Optional.ofNullable(candidates.get(id)).map(this::copy);
     }
 
     @Override
     public Collection<Candidate> findAll() {
-        return candidates.values();
+        return candidates.values().stream()
+                .sorted(Comparator.comparing(Candidate::getId))
+                .map(this::copy)
+                .toList();
+    }
+
+    private Candidate copy(Candidate candidate) {
+        return new Candidate(
+                candidate.getId(),
+                candidate.getName(),
+                candidate.getDescription(),
+                candidate.getCreationDate());
     }
 }
