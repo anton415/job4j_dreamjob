@@ -1,21 +1,26 @@
 package ru.job4j.dreamjob.repository;
 
-import ru.job4j.dreamjob.model.Vacancy;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import net.jcip.annotations.ThreadSafe;
 
 import org.springframework.stereotype.Repository;
 
+import ru.job4j.dreamjob.model.Vacancy;
+
+@ThreadSafe
 @Repository
 public class MemoryVacancyRepository implements VacancyRepository {
-    private int nextId = 1;
-    private final Map<Integer, Vacancy> vacancies = new HashMap<>();
+    private final AtomicInteger nextId = new AtomicInteger(1);
+    private final ConcurrentMap<Integer, Vacancy> vacancies = new ConcurrentHashMap<>();
 
-    private MemoryVacancyRepository() {
+    public MemoryVacancyRepository() {
         save(new Vacancy(0, "Intern Java Developer", "Description for Intern Java Developer", LocalDateTime.of(2024, 6, 11, 0, 0)));
         save(new Vacancy(0, "Junior Java Developer", "Description for Junior Java Developer", LocalDateTime.of(2025, 3, 2, 0, 0)));
         save(new Vacancy(0, "Junior Java Developer", "Description for Junior Java Developer", LocalDateTime.of(2026, 2, 13, 0, 0)));
@@ -27,9 +32,10 @@ public class MemoryVacancyRepository implements VacancyRepository {
 
     @Override
     public Vacancy save(Vacancy vacancy) {
-        vacancy.setId(nextId++);
-        vacancies.put(vacancy.getId(), vacancy);
-        return vacancy;
+        vacancy.setId(nextId.getAndIncrement());
+        var savedVacancy = copy(vacancy);
+        vacancies.put(savedVacancy.getId(), savedVacancy);
+        return copy(savedVacancy);
     }
 
     @Override
@@ -39,17 +45,33 @@ public class MemoryVacancyRepository implements VacancyRepository {
 
     @Override
     public boolean update(Vacancy vacancy) {
-        return vacancies.computeIfPresent(vacancy.getId(), 
-                (id, oldVacancy) -> new Vacancy(oldVacancy.getId(), vacancy.getTitle(), vacancy.getDescription(), vacancy.getCreationDate())) != null;
+        var updatedVacancy = copy(vacancy);
+        return vacancies.computeIfPresent(updatedVacancy.getId(),
+                (id, oldVacancy) -> new Vacancy(
+                        oldVacancy.getId(),
+                        updatedVacancy.getTitle(),
+                        updatedVacancy.getDescription(),
+                        oldVacancy.getCreationDate())) != null;
     }
 
     @Override
     public Optional<Vacancy> findById(int id) {
-        return Optional.ofNullable(vacancies.get(id));
+        return Optional.ofNullable(vacancies.get(id)).map(this::copy);
     }
 
     @Override
     public Collection<Vacancy> findAll() {
-        return vacancies.values();
+        return vacancies.values().stream()
+                .sorted(Comparator.comparing(Vacancy::getId))
+                .map(this::copy)
+                .toList();
+    }
+
+    private Vacancy copy(Vacancy vacancy) {
+        return new Vacancy(
+                vacancy.getId(),
+                vacancy.getTitle(),
+                vacancy.getDescription(),
+                vacancy.getCreationDate());
     }
 }
