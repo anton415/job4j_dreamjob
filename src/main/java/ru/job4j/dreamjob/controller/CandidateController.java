@@ -1,5 +1,7 @@
 package ru.job4j.dreamjob.controller;
 
+import java.io.IOException;
+
 import net.jcip.annotations.ThreadSafe;
 
 import org.springframework.stereotype.Controller;
@@ -9,7 +11,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import ru.job4j.dreamjob.dto.FileDto;
 import ru.job4j.dreamjob.model.Candidate;
 import ru.job4j.dreamjob.service.CandidateService;
 import ru.job4j.dreamjob.service.CityService;
@@ -39,8 +44,10 @@ public class CandidateController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute Candidate candidate) {
-        candidateService.save(candidate);
+    public String create(@ModelAttribute Candidate candidate,
+                         @RequestParam(name = "file", required = false) MultipartFile file)
+            throws IOException {
+        candidateService.save(candidate, toFileDto(file));
         return "redirect:/candidates";
     }
 
@@ -57,8 +64,11 @@ public class CandidateController {
     }
 
     @PostMapping("/update")
-    public String update(@ModelAttribute Candidate candidate, Model model) {
-        var isUpdated = candidateService.update(candidate);
+    public String update(@ModelAttribute Candidate candidate,
+                         @RequestParam(name = "file", required = false) MultipartFile file,
+                         Model model)
+            throws IOException {
+        var isUpdated = candidateService.update(candidate, toFileDto(file));
         if (!isUpdated) {
             model.addAttribute("message", "Кандидат с указанным идентификатором не найден");
             return "errors/404";
@@ -74,5 +84,12 @@ public class CandidateController {
             return "errors/404";
         }
         return "redirect:/candidates";
+    }
+
+    private FileDto toFileDto(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        return new FileDto(file.getOriginalFilename(), file.getBytes());
     }
 }

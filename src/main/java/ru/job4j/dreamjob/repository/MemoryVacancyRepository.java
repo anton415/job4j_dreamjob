@@ -60,7 +60,8 @@ public class MemoryVacancyRepository implements VacancyRepository {
                         updatedVacancy.getDescription(),
                         oldVacancy.getCreationDate(),
                         updatedVacancy.getVisible(),
-                        updatedVacancy.getCityId())) != null;
+                        updatedVacancy.getCityId(),
+                        updatedVacancy.getFileId())) != null;
     }
 
     @Override
@@ -83,6 +84,7 @@ public class MemoryVacancyRepository implements VacancyRepository {
                 vacancy.getDescription(),
                 vacancy.getCreationDate(),
                 vacancy.getVisible(),
-                vacancy.getCityId());
+                vacancy.getCityId(),
+                vacancy.getFileId());
     }
 }

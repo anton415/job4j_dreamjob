@@ -1,5 +1,7 @@
 package ru.job4j.dreamjob.controller;
 
+import java.io.IOException;
+
 import net.jcip.annotations.ThreadSafe;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,7 +10,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import ru.job4j.dreamjob.dto.FileDto;
 import ru.job4j.dreamjob.model.Vacancy;
 import ru.job4j.dreamjob.service.CityService;
 import ru.job4j.dreamjob.service.VacancyService;
@@ -38,8 +43,10 @@ public class VacancyController {
     }
 
     @PostMapping("/create")
-    public String create(@ModelAttribute Vacancy vacancy) {
-        vacancyService.save(vacancy);
+    public String create(@ModelAttribute Vacancy vacancy,
+                         @RequestParam(name = "file", required = false) MultipartFile file)
+            throws IOException {
+        vacancyService.save(vacancy, toFileDto(file));
         return "redirect:/vacancies";
     }
 
@@ -56,8 +63,11 @@ public class VacancyController {
     }
 
     @PostMapping("/update")
-    public String update(@ModelAttribute Vacancy vacancy, Model model) {
-        var isUpdated = vacancyService.update(vacancy);
+    public String update(@ModelAttribute Vacancy vacancy,
+                         @RequestParam(name = "file", required = false) MultipartFile file,
+                         Model model)
+            throws IOException {
+        var isUpdated = vacancyService.update(vacancy, toFileDto(file));
         if (!isUpdated) {
             model.addAttribute("message", "Вакансия с указанным идентификатором не найдена");
             return "errors/404";
@@ -73,5 +83,12 @@ public class VacancyController {
             return "errors/404";
         }
         return "redirect:/vacancies";
+    }
+
+    private FileDto toFileDto(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        return new FileDto(file.getOriginalFilename(), file.getBytes());
     }
 }
