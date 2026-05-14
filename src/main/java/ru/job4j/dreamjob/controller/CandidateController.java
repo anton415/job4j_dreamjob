@@ -12,15 +12,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import ru.job4j.dreamjob.model.Candidate;
 import ru.job4j.dreamjob.service.CandidateService;
+import ru.job4j.dreamjob.service.CityService;
 
 @ThreadSafe
 @Controller
 @RequestMapping("/candidates")
 public class CandidateController {
     private final CandidateService candidateService;
+    private final CityService cityService;
 
-    public CandidateController(CandidateService candidateService) {
+    public CandidateController(CandidateService candidateService, CityService cityService) {
         this.candidateService = candidateService;
+        this.cityService = cityService;
     }
 
     @GetMapping
@@ -30,8 +33,15 @@ public class CandidateController {
     }
 
     @GetMapping("/create")
-    public String getCreationPage() {
+    public String getCreationPage(Model model) {
+        model.addAttribute("cities", cityService.findAll());
         return "candidates/create";
+    }
+
+    @PostMapping("/create")
+    public String create(@ModelAttribute Candidate candidate) {
+        candidateService.save(candidate);
+        return "redirect:/candidates";
     }
 
     @GetMapping("/{id}")
@@ -42,6 +52,7 @@ public class CandidateController {
             return "errors/404";
         }
         model.addAttribute("candidate", candidateOptional.get());
+        model.addAttribute("cities", cityService.findAll());
         return "candidates/one";
     }
 

@@ -8,8 +8,10 @@ import ru.job4j.dreamjob.controller.CandidateController;
 import ru.job4j.dreamjob.controller.IndexController;
 import ru.job4j.dreamjob.controller.VacancyController;
 import ru.job4j.dreamjob.repository.MemoryCandidateRepository;
+import ru.job4j.dreamjob.repository.MemoryCityRepository;
 import ru.job4j.dreamjob.repository.MemoryVacancyRepository;
 import ru.job4j.dreamjob.service.SimpleCandidateService;
+import ru.job4j.dreamjob.service.SimpleCityService;
 import ru.job4j.dreamjob.service.SimpleVacancyService;
 
 import java.util.stream.Stream;
@@ -31,8 +33,10 @@ class ThreadSafeAnnotationTest {
                 VacancyController.class,
                 IndexController.class,
                 SimpleCandidateService.class,
+                SimpleCityService.class,
                 SimpleVacancyService.class,
                 MemoryCandidateRepository.class,
+                MemoryCityRepository.class,
                 MemoryVacancyRepository.class
         );
     }

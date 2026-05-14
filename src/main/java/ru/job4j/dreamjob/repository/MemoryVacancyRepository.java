@@ -21,13 +21,20 @@ public class MemoryVacancyRepository implements VacancyRepository {
     private final ConcurrentMap<Integer, Vacancy> vacancies = new ConcurrentHashMap<>();
 
     public MemoryVacancyRepository() {
-        save(new Vacancy(0, "Intern Java Developer", "Description for Intern Java Developer", LocalDateTime.of(2024, 6, 11, 0, 0)));
-        save(new Vacancy(0, "Junior Java Developer", "Description for Junior Java Developer", LocalDateTime.of(2025, 3, 2, 0, 0)));
-        save(new Vacancy(0, "Junior Java Developer", "Description for Junior Java Developer", LocalDateTime.of(2026, 2, 13, 0, 0)));
-        save(new Vacancy(0, "Junior+ Java Developer", "Description for Junior+ Java Developer", LocalDateTime.of(2023, 1, 21, 0, 0)));
-        save(new Vacancy(0, "Middle Java Developer", "Description for Middle Java Developer", LocalDateTime.of(2022, 6, 23, 0, 0)));
-        save(new Vacancy(0, "Middle+ Java Developer", "Description for Middle+ Java Developer", LocalDateTime.of(2021, 5, 11, 0, 0)));
-        save(new Vacancy(0, "Senior Java Developer", "Description for Senior Java Developer", LocalDateTime.of(2021, 6, 30, 0, 0)));
+        save(new Vacancy(0, "Intern Java Developer", "Description for Intern Java Developer",
+                LocalDateTime.of(2024, 6, 11, 0, 0), 1));
+        save(new Vacancy(0, "Junior Java Developer", "Description for Junior Java Developer",
+                LocalDateTime.of(2025, 3, 2, 0, 0), 2));
+        save(new Vacancy(0, "Junior Java Developer", "Description for Junior Java Developer",
+                LocalDateTime.of(2026, 2, 13, 0, 0), 3));
+        save(new Vacancy(0, "Junior+ Java Developer", "Description for Junior+ Java Developer",
+                LocalDateTime.of(2023, 1, 21, 0, 0), 1));
+        save(new Vacancy(0, "Middle Java Developer", "Description for Middle Java Developer",
+                LocalDateTime.of(2022, 6, 23, 0, 0), 2));
+        save(new Vacancy(0, "Middle+ Java Developer", "Description for Middle+ Java Developer",
+                LocalDateTime.of(2021, 5, 11, 0, 0), 3));
+        save(new Vacancy(0, "Senior Java Developer", "Description for Senior Java Developer",
+                LocalDateTime.of(2021, 6, 30, 0, 0), 1));
     }
 
     @Override
@@ -52,7 +59,8 @@ public class MemoryVacancyRepository implements VacancyRepository {
                         updatedVacancy.getTitle(),
                         updatedVacancy.getDescription(),
                         oldVacancy.getCreationDate(),
-                        updatedVacancy.getVisible())) != null;
+                        updatedVacancy.getVisible(),
+                        updatedVacancy.getCityId())) != null;
     }
 
     @Override
@@ -74,6 +82,7 @@ public class MemoryVacancyRepository implements VacancyRepository {
                 vacancy.getTitle(),
                 vacancy.getDescription(),
                 vacancy.getCreationDate(),
-                vacancy.getVisible());
+                vacancy.getVisible(),
+                vacancy.getCityId());
     }
 }

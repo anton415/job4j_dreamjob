@@ -45,6 +45,7 @@ class MemoryVacancyRepositoryTest {
 
         vacancy.setTitle("Changed");
         vacancy.setVisible(true);
+        vacancy.setCityId(3);
 
         assertThat(repository.findById(vacancy.getId()))
                 .get()
@@ -54,10 +55,14 @@ class MemoryVacancyRepositoryTest {
                 .get()
                 .extracting(Vacancy::getVisible)
                 .isEqualTo(false);
+        assertThat(repository.findById(vacancy.getId()))
+                .get()
+                .extracting(Vacancy::getCityId)
+                .isEqualTo(0);
     }
 
     @Test
-    void whenUpdateVacancyThenVisibleIsUpdated() {
+    void whenUpdateVacancyThenVisibleAndCityIdAreUpdated() {
         var repository = new MemoryVacancyRepository();
         var vacancy = repository.save(vacancy(0));
         var updatedVacancy = new Vacancy(
@@ -65,13 +70,18 @@ class MemoryVacancyRepositoryTest {
                 "Updated",
                 "Updated description",
                 LocalDateTime.now(),
-                true);
+                true,
+                2);
 
         assertThat(repository.update(updatedVacancy)).isTrue();
         assertThat(repository.findById(vacancy.getId()))
                 .get()
                 .extracting(Vacancy::getVisible)
                 .isEqualTo(true);
+        assertThat(repository.findById(vacancy.getId()))
+                .get()
+                .extracting(Vacancy::getCityId)
+                .isEqualTo(2);
     }
 
     private static List<Vacancy> saveVacancies(MemoryVacancyRepository repository, int count)
