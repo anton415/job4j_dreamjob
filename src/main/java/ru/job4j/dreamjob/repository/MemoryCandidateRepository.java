@@ -21,11 +21,16 @@ public class MemoryCandidateRepository implements CandidateRepository {
     private final ConcurrentMap<Integer, Candidate> candidates = new ConcurrentHashMap<>();
 
     public MemoryCandidateRepository() {
-        save(new Candidate(0, "Anton", "Go developer", LocalDateTime.of(2024, 6, 11, 0, 0)));
-        save(new Candidate(0, "Petr", "Java developer", LocalDateTime.of(2025, 3, 2, 0, 0)));
-        save(new Candidate(0, "Sidor", "Python developer", LocalDateTime.of(2026, 2, 13, 0, 0)));
-        save(new Candidate(0, "Vladimir", "C# developer", LocalDateTime.of(2023, 1, 21, 0, 0)));
-        save(new Candidate(0, "Dmitry", "C++ developer", LocalDateTime.of(2022, 6, 23, 0, 0)));
+        save(new Candidate(0, "Anton", "Go developer",
+                LocalDateTime.of(2024, 6, 11, 0, 0), 1));
+        save(new Candidate(0, "Petr", "Java developer",
+                LocalDateTime.of(2025, 3, 2, 0, 0), 2));
+        save(new Candidate(0, "Sidor", "Python developer",
+                LocalDateTime.of(2026, 2, 13, 0, 0), 3));
+        save(new Candidate(0, "Vladimir", "C# developer",
+                LocalDateTime.of(2023, 1, 21, 0, 0), 1));
+        save(new Candidate(0, "Dmitry", "C++ developer",
+                LocalDateTime.of(2022, 6, 23, 0, 0), 2));
     }
 
     @Override
@@ -49,7 +54,8 @@ public class MemoryCandidateRepository implements CandidateRepository {
                         oldCandidate.getId(),
                         updatedCandidate.getName(),
                         updatedCandidate.getDescription(),
-                        oldCandidate.getCreationDate())) != null;
+                        oldCandidate.getCreationDate(),
+                        updatedCandidate.getCityId())) != null;
     }
 
     @Override
@@ -70,6 +76,7 @@ public class MemoryCandidateRepository implements CandidateRepository {
                 candidate.getId(),
                 candidate.getName(),
                 candidate.getDescription(),
-                candidate.getCreationDate());
+                candidate.getCreationDate(),
+                candidate.getCityId());
     }
 }

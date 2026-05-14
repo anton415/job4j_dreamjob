@@ -44,11 +44,34 @@ class MemoryCandidateRepositoryTest {
         var candidate = repository.save(candidate(0));
 
         candidate.setName("Changed");
+        candidate.setCityId(3);
 
         assertThat(repository.findById(candidate.getId()))
                 .get()
                 .extracting(Candidate::getName)
                 .isEqualTo("Candidate 0");
+        assertThat(repository.findById(candidate.getId()))
+                .get()
+                .extracting(Candidate::getCityId)
+                .isEqualTo(0);
+    }
+
+    @Test
+    void whenUpdateCandidateThenCityIdIsUpdated() {
+        var repository = new MemoryCandidateRepository();
+        var candidate = repository.save(candidate(0));
+        var updatedCandidate = new Candidate(
+                candidate.getId(),
+                "Updated",
+                "Updated description",
+                LocalDateTime.now(),
+                2);
+
+        assertThat(repository.update(updatedCandidate)).isTrue();
+        assertThat(repository.findById(candidate.getId()))
+                .get()
+                .extracting(Candidate::getCityId)
+                .isEqualTo(2);
     }
 
     private static List<Candidate> saveCandidates(MemoryCandidateRepository repository, int count)
