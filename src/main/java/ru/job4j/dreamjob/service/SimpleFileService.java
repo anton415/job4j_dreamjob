@@ -2,6 +2,7 @@ package ru.job4j.dreamjob.service;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.UUID;
@@ -85,6 +86,14 @@ public class SimpleFileService implements FileService {
         if (sourceName == null || sourceName.isBlank()) {
             return "file";
         }
-        return Path.of(sourceName).getFileName().toString();
+        try {
+            var fileName = Path.of(sourceName).getFileName();
+            if (fileName == null || fileName.toString().isBlank()) {
+                return "file";
+            }
+            return fileName.toString();
+        } catch (InvalidPathException exception) {
+            return "file";
+        }
     }
 }
