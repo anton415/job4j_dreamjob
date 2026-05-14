@@ -44,11 +44,34 @@ class MemoryVacancyRepositoryTest {
         var vacancy = repository.save(vacancy(0));
 
         vacancy.setTitle("Changed");
+        vacancy.setVisible(true);
 
         assertThat(repository.findById(vacancy.getId()))
                 .get()
                 .extracting(Vacancy::getTitle)
                 .isEqualTo("Vacancy 0");
+        assertThat(repository.findById(vacancy.getId()))
+                .get()
+                .extracting(Vacancy::getVisible)
+                .isEqualTo(false);
+    }
+
+    @Test
+    void whenUpdateVacancyThenVisibleIsUpdated() {
+        var repository = new MemoryVacancyRepository();
+        var vacancy = repository.save(vacancy(0));
+        var updatedVacancy = new Vacancy(
+                vacancy.getId(),
+                "Updated",
+                "Updated description",
+                LocalDateTime.now(),
+                true);
+
+        assertThat(repository.update(updatedVacancy)).isTrue();
+        assertThat(repository.findById(vacancy.getId()))
+                .get()
+                .extracting(Vacancy::getVisible)
+                .isEqualTo(true);
     }
 
     private static List<Vacancy> saveVacancies(MemoryVacancyRepository repository, int count)
