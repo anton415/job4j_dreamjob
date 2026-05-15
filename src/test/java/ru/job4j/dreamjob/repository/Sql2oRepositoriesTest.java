@@ -22,6 +22,7 @@ import org.sql2o.converters.ConverterException;
 import org.sql2o.quirks.NoQuirks;
 
 import ru.job4j.dreamjob.model.City;
+import ru.job4j.dreamjob.model.Candidate;
 import ru.job4j.dreamjob.model.File;
 import ru.job4j.dreamjob.model.Vacancy;
 
@@ -38,6 +39,7 @@ class Sql2oRepositoriesTest {
         runScript(dataSource, "db/scripts/002_dml_insert_cities.sql");
         runScript(dataSource, "db/scripts/003_ddl_create_files_table.sql");
         runScript(dataSource, "db/scripts/004_ddl_create_vacancies_table.sql");
+        runScript(dataSource, "db/scripts/004_ddl_create_candidate_table.sql");
     }
 
     @Test
@@ -105,6 +107,45 @@ class Sql2oRepositoriesTest {
 
         assertThat(repository.deleteById(savedVacancy.getId())).isTrue();
         assertThat(repository.findById(savedVacancy.getId())).isEmpty();
+    }
+
+    @Test
+    void whenSaveUpdateFindAndDeleteCandidateThenRepositoryUsesDatabase() {
+        var fileRepository = new Sql2oFileRepository(sql2o);
+        var file = fileRepository.save(new File("candidate.png", "/tmp/candidate.png"));
+        var repository = new Sql2oCandidateRepository(sql2o);
+        var creationDate = LocalDateTime.of(2026, 5, 15, 10, 30);
+        var candidate = new Candidate(0, "Anton", "Java developer", creationDate, 1, file.getId());
+
+        var savedCandidate = repository.save(candidate);
+
+        assertThat(savedCandidate.getId()).isPositive();
+        assertThat(repository.findById(savedCandidate.getId()))
+                .get()
+                .satisfies(saved -> {
+                    assertThat(saved.getName()).isEqualTo("Anton");
+                    assertThat(saved.getDescription()).isEqualTo("Java developer");
+                    assertThat(saved.getCreationDate()).isEqualTo(creationDate);
+                    assertThat(saved.getCityId()).isEqualTo(1);
+                    assertThat(saved.getFileId()).isEqualTo(file.getId());
+                });
+
+        var updated = new Candidate(savedCandidate.getId(), "Petr", "Go developer", LocalDateTime.now(), 2, 0);
+
+        assertThat(repository.update(updated)).isTrue();
+        assertThat(repository.findById(savedCandidate.getId()))
+                .get()
+                .satisfies(found -> {
+                    assertThat(found.getName()).isEqualTo("Petr");
+                    assertThat(found.getDescription()).isEqualTo("Go developer");
+                    assertThat(found.getCityId()).isEqualTo(2);
+                    assertThat(found.getFileId()).isEqualTo(0);
+                    assertThat(found.getCreationDate()).isEqualTo(creationDate);
+                });
+
+        assertThat(repository.findAll()).containsExactly(repository.findById(savedCandidate.getId()).orElseThrow());
+        assertThat(repository.deleteById(savedCandidate.getId())).isTrue();
+        assertThat(repository.findById(savedCandidate.getId())).isEmpty();
     }
 
     private static DataSource dataSource() {

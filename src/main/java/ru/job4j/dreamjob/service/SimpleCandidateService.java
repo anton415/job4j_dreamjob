@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @ThreadSafe
@@ -21,8 +22,9 @@ public class SimpleCandidateService implements CandidateService {
     private final FileService fileService;
 
     @Autowired
-    public SimpleCandidateService(CandidateRepository candidateRepository, FileService fileService) {
-        this.candidateRepository = candidateRepository;
+    public SimpleCandidateService(@Qualifier("sql2oCandidateRepository") CandidateRepository sql2oCandidateRepository,
+                                  FileService fileService) {
+        this.candidateRepository = sql2oCandidateRepository;
         this.fileService = fileService;
     }
 
