@@ -1,0 +1,5 @@
+CREATE TABLE files (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    path VARCHAR(4096) NOT NULL
+);
