@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @ThreadSafe
@@ -20,8 +21,9 @@ public class SimpleVacancyService implements VacancyService {
     private final FileService fileService;
 
     @Autowired
-    public SimpleVacancyService(VacancyRepository vacancyRepository, FileService fileService) {
-        this.vacancyRepository = vacancyRepository;
+    public SimpleVacancyService(@Qualifier("sql2oVacancyRepository") VacancyRepository sql2oVacancyRepository,
+                                FileService fileService) {
+        this.vacancyRepository = sql2oVacancyRepository;
         this.fileService = fileService;
     }
 

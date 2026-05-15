@@ -10,6 +10,9 @@ import ru.job4j.dreamjob.controller.VacancyController;
 import ru.job4j.dreamjob.repository.MemoryCandidateRepository;
 import ru.job4j.dreamjob.repository.MemoryCityRepository;
 import ru.job4j.dreamjob.repository.MemoryVacancyRepository;
+import ru.job4j.dreamjob.repository.Sql2oCityRepository;
+import ru.job4j.dreamjob.repository.Sql2oFileRepository;
+import ru.job4j.dreamjob.repository.Sql2oVacancyRepository;
 import ru.job4j.dreamjob.service.SimpleCandidateService;
 import ru.job4j.dreamjob.service.SimpleCityService;
 import ru.job4j.dreamjob.service.SimpleVacancyService;
@@ -37,7 +40,10 @@ class ThreadSafeAnnotationTest {
                 SimpleVacancyService.class,
                 MemoryCandidateRepository.class,
                 MemoryCityRepository.class,
-                MemoryVacancyRepository.class
+                MemoryVacancyRepository.class,
+                Sql2oCityRepository.class,
+                Sql2oFileRepository.class,
+                Sql2oVacancyRepository.class
         );
     }
 }

@@ -10,6 +10,7 @@ import java.util.UUID;
 import net.jcip.annotations.ThreadSafe;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +25,9 @@ public class SimpleFileService implements FileService {
     private final String storageDirectory;
 
     @Autowired
-    public SimpleFileService(FileRepository fileRepository,
+    public SimpleFileService(@Qualifier("sql2oFileRepository") FileRepository sql2oFileRepository,
                              @Value("${file.directory}") String storageDirectory) {
-        this.fileRepository = fileRepository;
+        this.fileRepository = sql2oFileRepository;
         this.storageDirectory = storageDirectory;
     }
 
