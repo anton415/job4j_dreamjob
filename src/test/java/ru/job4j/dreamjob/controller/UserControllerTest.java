@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.mock.web.MockHttpSession;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,6 +19,7 @@ import ru.job4j.dreamjob.service.UserService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -92,5 +94,48 @@ class UserControllerTest {
                 .andExpect(redirectedUrl("/"));
 
         assertThat(session.isInvalid()).isTrue();
+    }
+
+    @Test
+    void whenGetRegistrationPageThenReturnsRegisterView() throws Exception {
+        mockMvc.perform(get("/users/register"))
+                .andExpect(status().isOk())
+                .andExpect(request().attribute("user", hasProperty("name", is("Гость"))))
+                .andExpect(view().name("users/register"));
+    }
+
+    @Test
+    void whenRegisterNewUserThenRedirectsToIndex() throws Exception {
+        var savedUser = new User(1, "mail@test.com", "Anton", "password");
+        when(userService.save(any(User.class))).thenReturn(Optional.of(savedUser));
+
+        mockMvc.perform(post("/users/register")
+                        .param("email", "mail@test.com")
+                        .param("name", "Anton")
+                        .param("password", "password"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        var userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userService).save(userCaptor.capture());
+        assertThat(userCaptor.getValue().getEmail()).isEqualTo("mail@test.com");
+        assertThat(userCaptor.getValue().getName()).isEqualTo("Anton");
+        assertThat(userCaptor.getValue().getPassword()).isEqualTo("password");
+    }
+
+    @Test
+    void whenRegisterExistingUserThenReturnsRegisterViewWithMessage() throws Exception {
+        when(userService.save(any(User.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(post("/users/register")
+                        .param("email", "mail@test.com")
+                        .param("name", "Anton")
+                        .param("password", "password"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("users/register"))
+                .andExpect(request().attribute("user", hasProperty("name", is("Гость"))))
+                .andExpect(model().attribute("message", "Пользователь с такой почтой уже существует"));
+
+        verify(userService).save(any(User.class));
     }
 }
