@@ -2,7 +2,6 @@ package ru.job4j.dreamjob.controller;
 
 import java.io.IOException;
 
-import jakarta.servlet.http.HttpSession;
 import net.jcip.annotations.ThreadSafe;
 
 import org.springframework.stereotype.Controller;
@@ -15,10 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import ru.job4j.dreamjob.dto.FileDto;
 import ru.job4j.dreamjob.model.Candidate;
 import ru.job4j.dreamjob.service.CandidateService;
 import ru.job4j.dreamjob.service.CityService;
+
+import static ru.job4j.dreamjob.controller.MultipartFileConverter.toFileDto;
 
 @ThreadSafe
 @Controller
@@ -33,15 +33,13 @@ public class CandidateController {
     }
 
     @GetMapping
-    public String getAll(Model model, HttpSession session) {
-        SessionUser.addToModel(model, session);
+    public String getAll(Model model) {
         model.addAttribute("candidates", candidateService.findAll());
         return "candidates/list";
     }
 
     @GetMapping("/create")
-    public String getCreationPage(Model model, HttpSession session) {
-        SessionUser.addToModel(model, session);
+    public String getCreationPage(Model model) {
         model.addAttribute("cities", cityService.findAll());
         return "candidates/create";
     }
@@ -55,8 +53,7 @@ public class CandidateController {
     }
 
     @GetMapping("/{id}")
-    public String getById(Model model, @PathVariable int id, HttpSession session) {
-        SessionUser.addToModel(model, session);
+    public String getById(Model model, @PathVariable int id) {
         var candidateOptional = candidateService.findById(id);
         if (candidateOptional.isEmpty()) {
             model.addAttribute("message", "Кандидат с указанным идентификатором не найден");
@@ -70,12 +67,10 @@ public class CandidateController {
     @PostMapping("/update")
     public String update(@ModelAttribute Candidate candidate,
                          @RequestParam(name = "file", required = false) MultipartFile file,
-                         Model model,
-                         HttpSession session)
+                         Model model)
             throws IOException {
         var isUpdated = candidateService.update(candidate, toFileDto(file));
         if (!isUpdated) {
-            SessionUser.addToModel(model, session);
             model.addAttribute("message", "Кандидат с указанным идентификатором не найден");
             return "errors/404";
         }
@@ -83,20 +78,12 @@ public class CandidateController {
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(Model model, @PathVariable int id, HttpSession session) {
+    public String delete(Model model, @PathVariable int id) {
         var isDeleted = candidateService.deleteById(id);
         if (!isDeleted) {
-            SessionUser.addToModel(model, session);
             model.addAttribute("message", "Кандидат с указанным идентификатором не найден");
             return "errors/404";
         }
         return "redirect:/candidates";
-    }
-
-    private FileDto toFileDto(MultipartFile file) throws IOException {
-        if (file == null || file.isEmpty()) {
-            return null;
-        }
-        return new FileDto(file.getOriginalFilename(), file.getBytes());
     }
 }

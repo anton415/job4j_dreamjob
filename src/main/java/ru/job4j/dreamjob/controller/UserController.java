@@ -23,16 +23,14 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public String getLoginPage(Model model, HttpSession session) {
-        SessionUser.addToModel(model, session);
+    public String getLoginPage() {
         return "users/login";
     }
 
     @PostMapping("/login")
-    public String loginUser(@ModelAttribute User user, Model model, HttpServletRequest request) {
+    public String loginUser(@ModelAttribute("loginUser") User user, Model model, HttpServletRequest request) {
         var userOptional = userService.findByEmailAndPassword(user.getEmail(), user.getPassword());
         if (userOptional.isEmpty()) {
-            SessionUser.addToModel(model, request.getSession(false));
             model.addAttribute("message", "Почта или пароль введены неверно");
             return "users/login";
         }
@@ -41,16 +39,14 @@ public class UserController {
     }
 
     @GetMapping("/users/register")
-    public String getRegistrationPage(Model model, HttpSession session) {
-        SessionUser.addToModel(model, session);
+    public String getRegistrationPage() {
         return "users/register";
     }
 
     @PostMapping("/users/register")
-    public String register(@ModelAttribute User user, Model model, HttpSession session) {
+    public String register(@ModelAttribute("registrationUser") User user, Model model) {
         var savedUser = userService.save(user);
         if (savedUser.isEmpty()) {
-            SessionUser.addToModel(model, session);
             model.addAttribute("message", "Пользователь с такой почтой уже существует");
             return "users/register";
         }

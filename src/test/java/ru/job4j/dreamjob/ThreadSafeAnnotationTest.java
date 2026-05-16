@@ -8,6 +8,8 @@ import ru.job4j.dreamjob.controller.CandidateController;
 import ru.job4j.dreamjob.controller.IndexController;
 import ru.job4j.dreamjob.controller.UserController;
 import ru.job4j.dreamjob.controller.VacancyController;
+import ru.job4j.dreamjob.filter.AuthorizationFilter;
+import ru.job4j.dreamjob.filter.SessionFilter;
 import ru.job4j.dreamjob.repository.MemoryCandidateRepository;
 import ru.job4j.dreamjob.repository.MemoryCityRepository;
 import ru.job4j.dreamjob.repository.MemoryVacancyRepository;
@@ -40,6 +42,8 @@ class ThreadSafeAnnotationTest {
                 VacancyController.class,
                 UserController.class,
                 IndexController.class,
+                AuthorizationFilter.class,
+                SessionFilter.class,
                 SimpleCandidateService.class,
                 SimpleCityService.class,
                 SimpleVacancyService.class,
