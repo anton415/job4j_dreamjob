@@ -20,9 +20,10 @@ public class DatasourceConfiguration {
     @Bean(destroyMethod = "close")
     public BasicDataSource connectionPool(@Value("${datasource.url}") String url,
                                           @Value("${datasource.username}") String username,
-                                          @Value("${datasource.password}") String password) {
+                                          @Value("${datasource.password}") String password,
+                                          @Value("${datasource.driver-class-name}") String driverClassName) {
         var dataSource = new BasicDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
+        dataSource.setDriverClassName(driverClassName);
         dataSource.setUrl(url);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
