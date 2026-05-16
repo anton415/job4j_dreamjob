@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import ru.job4j.dreamjob.filter.SessionFilter;
 import ru.job4j.dreamjob.model.User;
 import ru.job4j.dreamjob.service.UserService;
 
@@ -36,14 +37,16 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService))
+                .addFilters(new SessionFilter())
+                .build();
     }
 
     @Test
     void whenGetLoginPageThenReturnsLoginView() throws Exception {
         mockMvc.perform(get("/login"))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("user", hasProperty("name", is("Гость"))))
+                .andExpect(request().attribute("user", hasProperty("name", is("Гость"))))
                 .andExpect(view().name("users/login"));
     }
 
@@ -73,7 +76,7 @@ class UserControllerTest {
                         .param("password", "wrong"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("users/login"))
-                .andExpect(model().attribute("user", hasProperty("name", is("Гость"))))
+                .andExpect(request().attribute("user", hasProperty("name", is("Гость"))))
                 .andExpect(model().attribute("message", "Почта или пароль введены неверно"));
 
         verify(userService).findByEmailAndPassword("mail@test.com", "wrong");

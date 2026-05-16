@@ -7,12 +7,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.InternalResourceView;
 
+import ru.job4j.dreamjob.filter.SessionFilter;
 import ru.job4j.dreamjob.model.User;
 
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -22,6 +23,7 @@ class IndexControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(new IndexController())
+                .addFilters(new SessionFilter())
                 .setSingleView(new InternalResourceView("/WEB-INF/views/index.html"))
                 .build();
     }
@@ -34,7 +36,7 @@ class IndexControllerTest {
 
         mockMvc.perform(get("/").session(session))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute(SessionUser.USER_ATTRIBUTE, user))
+                .andExpect(request().attribute(SessionUser.USER_ATTRIBUTE, user))
                 .andExpect(view().name("index"));
     }
 
@@ -42,8 +44,8 @@ class IndexControllerTest {
     void whenSessionHasNoUserThenIndexModelHasGuest() throws Exception {
         mockMvc.perform(get("/index"))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute(SessionUser.USER_ATTRIBUTE, hasProperty("id", is(0))))
-                .andExpect(model().attribute(SessionUser.USER_ATTRIBUTE, hasProperty("name", is("Гость"))))
+                .andExpect(request().attribute(SessionUser.USER_ATTRIBUTE, hasProperty("id", is(0))))
+                .andExpect(request().attribute(SessionUser.USER_ATTRIBUTE, hasProperty("name", is("Гость"))))
                 .andExpect(view().name("index"));
     }
 }
