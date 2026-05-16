@@ -25,7 +25,8 @@ final class Sql2oTestHelper {
             "db/scripts/002_dml_insert_cities.sql",
             "db/scripts/003_ddl_create_files_table.sql",
             "db/scripts/004_ddl_create_vacancies_table.sql",
-            "db/scripts/004_ddl_create_candidate_table.sql"
+            "db/scripts/004_ddl_create_candidate_table.sql",
+            "db/scripts/006_ddl_create_users_table.sql"
     };
 
     private Sql2oTestHelper() {
