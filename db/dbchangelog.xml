@@ -34,4 +34,10 @@
                  relativeToChangelogFile="true"
                  encoding="UTF-8"/>
     </changeSet>
+
+    <changeSet id="006-create-users-table" author="job4j">
+        <sqlFile path="scripts/006_ddl_create_users_table.sql"
+                 relativeToChangelogFile="true"
+                 encoding="UTF-8"/>
+    </changeSet>
 </databaseChangeLog>
