@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.mock.web.MockHttpSession;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -13,12 +14,16 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.job4j.dreamjob.model.User;
 import ru.job4j.dreamjob.service.UserService;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -38,18 +43,21 @@ class UserControllerTest {
     void whenGetLoginPageThenReturnsLoginView() throws Exception {
         mockMvc.perform(get("/login"))
                 .andExpect(status().isOk())
+                .andExpect(model().attribute("user", hasProperty("name", is("Гость"))))
                 .andExpect(view().name("users/login"));
     }
 
     @Test
     void whenLoginWithKnownUserThenRedirectsToIndex() throws Exception {
+        var user = new User(1, "mail@test.com", "Anton", "password");
         when(userService.findByEmailAndPassword("mail@test.com", "password"))
-                .thenReturn(Optional.of(new User(1, "mail@test.com", "Anton", "password")));
+                .thenReturn(Optional.of(user));
 
         mockMvc.perform(post("/login")
                         .param("email", "mail@test.com")
                         .param("password", "password"))
                 .andExpect(status().is3xxRedirection())
+                .andExpect(request().sessionAttribute(SessionUser.USER_ATTRIBUTE, user))
                 .andExpect(redirectedUrl("/"));
 
         verify(userService).findByEmailAndPassword("mail@test.com", "password");
@@ -65,8 +73,21 @@ class UserControllerTest {
                         .param("password", "wrong"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("users/login"))
+                .andExpect(model().attribute("user", hasProperty("name", is("Гость"))))
                 .andExpect(model().attribute("message", "Почта или пароль введены неверно"));
 
         verify(userService).findByEmailAndPassword("mail@test.com", "wrong");
+    }
+
+    @Test
+    void whenLogoutThenSessionIsInvalidated() throws Exception {
+        var session = new MockHttpSession();
+        session.setAttribute(SessionUser.USER_ATTRIBUTE, new User(1, "mail@test.com", "Anton", "password"));
+
+        mockMvc.perform(get("/logout").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        assertThat(session.isInvalid()).isTrue();
     }
 }
