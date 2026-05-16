@@ -2,6 +2,7 @@ package ru.job4j.dreamjob.controller;
 
 import java.io.IOException;
 
+import jakarta.servlet.http.HttpSession;
 import net.jcip.annotations.ThreadSafe;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,13 +32,15 @@ public class VacancyController {
     }
 
     @GetMapping
-    public String getAll(Model model) {
+    public String getAll(Model model, HttpSession session) {
+        SessionUser.addToModel(model, session);
         model.addAttribute("vacancies", vacancyService.findAll());
         return "vacancies/list";
     }
 
     @GetMapping("/create")
-    public String getCreationPage(Model model) {
+    public String getCreationPage(Model model, HttpSession session) {
+        SessionUser.addToModel(model, session);
         model.addAttribute("cities", cityService.findAll());
         return "vacancies/create";
     }
@@ -51,7 +54,8 @@ public class VacancyController {
     }
 
     @GetMapping("/{id}")
-    public String getById(Model model, @PathVariable int id) {
+    public String getById(Model model, @PathVariable int id, HttpSession session) {
+        SessionUser.addToModel(model, session);
         var vacancyOptional = vacancyService.findById(id);
         if (vacancyOptional.isEmpty()) {
             model.addAttribute("message", "Вакансия с указанным идентификатором не найдена");
@@ -65,10 +69,12 @@ public class VacancyController {
     @PostMapping("/update")
     public String update(@ModelAttribute Vacancy vacancy,
                          @RequestParam(name = "file", required = false) MultipartFile file,
-                         Model model)
+                         Model model,
+                         HttpSession session)
             throws IOException {
         var isUpdated = vacancyService.update(vacancy, toFileDto(file));
         if (!isUpdated) {
+            SessionUser.addToModel(model, session);
             model.addAttribute("message", "Вакансия с указанным идентификатором не найдена");
             return "errors/404";
         }
@@ -76,9 +82,10 @@ public class VacancyController {
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(Model model, @PathVariable int id) {
+    public String delete(Model model, @PathVariable int id, HttpSession session) {
         var isDeleted = vacancyService.deleteById(id);
         if (!isDeleted) {
+            SessionUser.addToModel(model, session);
             model.addAttribute("message", "Вакансия с указанным идентификатором не найдена");
             return "errors/404";
         }
